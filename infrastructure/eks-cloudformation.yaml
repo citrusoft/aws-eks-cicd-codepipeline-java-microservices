@@ -199,6 +199,26 @@
           - Key: Project
             Value: !Sub 'aws-eks-${SolutionName}'
     
+    PrivateSubnet1:
+      Type: AWS::EC2::Subnet
+      Properties:
+        CidrBlock: 10.0.3.0/24
+        VpcId: !Ref eksVPC
+        AvailabilityZone: !Select [ 0, !GetAZs '' ]
+        Tags:
+          - Key: Name
+            Value: PrivateSubnet1
+
+    PrivateSubnet2:
+      Type: AWS::EC2::Subnet
+      Properties:
+        CidrBlock: 10.0.4.0/24
+        VpcId: !Ref eksVPC
+        AvailabilityZone: !Select [ 1, !GetAZs '' ]
+        Tags:
+          - Key: Name
+            Value: PrivateSubnet2
+
     eksPublicSubnet01RouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
@@ -295,7 +315,7 @@
       DependsOn: [eksCluster, eksNodeInstanceRole]
   
   Outputs:
-    SubnetIds:
+    PublicSubnetIds:
       Description: Subnets IDs in the eksVPC
       Value: !Join [ ",", [ !Ref eksPublicSubnet01, !Ref eksPublicSubnet02 ] ]
     SecurityGroups:
@@ -304,3 +324,33 @@
     VpcId:
       Description: The eksVPC Id
       Value: !Ref eksVPC
+      Export:
+        Name: !Sub ${AWS::StackName}-VpcId
+
+    PrivateSubnet1:
+      Description: PrivateSubnet1
+      Value: !Ref PrivateSubnet1
+      Export:
+        Name: !Sub ${AWS::StackName}-PrivateSubnet1
+
+    PrivateSubnet1Arn:
+      Description: PrivateSubnet1Arn
+      Value: !Sub
+        - arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/${PrivateSubnet1}
+        - PrivateSubnet1: !Ref PrivateSubnet1
+      Export:
+        Name: !Sub ${AWS::StackName}-PrivateSubnet1Arn
+
+    PrivateSubnet2:
+      Description: PrivateSubnet2
+      Value: !Ref PrivateSubnet2
+      Export:
+        Name: !Sub ${AWS::StackName}-PrivateSubnet2
+
+    PrivateSubnet2Arn:
+      Description: PrivateSubnet2Arn
+      Value: !Sub
+        - arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/${PrivateSubnet2}
+        - PrivateSubnet2: !Ref PrivateSubnet2
+      Export:
+        Name: !Sub ${AWS::StackName}-PrivateSubnet2Arn
